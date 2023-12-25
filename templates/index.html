@@ -25,11 +25,22 @@
           sensor.start();
           console.log('started')
       }
+
+      function test() {
+        i = j = k = 0;
+        $.post("/upload_data",{'i':i,'j':j,'k':k},
+            function(data, status){
+                console.log(data)
+                console.log(status)
+            }
+        )
+      }
     </script>
 
 </head>
 <body>
 <button onclick="initSensor()">Start</button>
+<button onclick="test()">Test senza accelerometro</button>
 <div id="output"></div>
 </body>
 </html>

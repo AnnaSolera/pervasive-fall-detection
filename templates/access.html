@@ -1,0 +1,33 @@
+<html>
+    <head><title>Login Page</title></head>
+    <body>
+
+        {% if message %}
+        <h1>Hello {{ message }}!</h1>
+        {% endif %}
+
+        <h1>LOGIN</h1>
+        <form action="/login" method="POST">
+            <input type="text" name="email" />
+            <input type="password" name="password" />
+            <button type="submit">LOGIN</button>
+        </form>
+        <a href="/recover_password">Recover your password!</a>
+
+        <h1>SIGN UP</h1>
+        <form action="/signup" method="POST">
+            <input type="text" name="email" />
+            <input type="password" name="password" />
+            <input type="text" name="passphrase" />
+            <button type="submit">SIGNUP</button>
+        </form>
+
+        <h1>SUBSCRIBE TO SOMEONE</h1>
+        <form action="/subscribe" method="POST">
+            <input type="text" name="email" />
+            <input type="text" name="passphrase" />
+            <button type="submit">SUBSCRIBE</button>
+        </form>
+
+    </body>
+</html>

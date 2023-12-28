@@ -1,14 +1,32 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import random
+import os
 
 app = Flask(__name__)
 
+app.secret_key = b"AJWST"
+
+
 @app.route("/")
+def entry_point():
+    return redirect(url_for("access"))
+
+@app.route("/access")
 def access():
+
+    if "email" in session:
+        return redirect(url_for("main", email=session["email"]))
+
     return render_template("access.html")
 
 @app.route("/main/<email>")
 def main(email):
+    if "email" not in session:
+        return redirect(url_for("access"))
+    
+    if email != session["email"]:
+        return redirect(url_for("main", email=session["email"]))
+
     return render_template("index.html")
 
 @app.route("/upload_data", methods=["GET", "POST"])
@@ -22,15 +40,21 @@ def upload_data():
 def login():
 
     # dovremo gestirlo tramite database
-    if request.form["email"] == "anna" and request.form["password"] == "anna":
+    if request.form["email"] == "anna@gmail.com" and request.form["password"] == "anna":
         # controlla se attivo
         if True:
+            session["email"] = request.form["email"]
             return redirect(url_for('main', email="anna"))
         else:
             return render_template("access.html", message="Check your inbox for the activation link")
 
     else:
         return render_template("access.html", message="Email / password not matched")
+    
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.pop("email", None)
+    return "OK"
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -60,6 +84,7 @@ def activate_user(email, random_number):
     # se compatibili, allora cambia il db mettendo il campo valid a uno
 
     # renderizza login con messaggio utente attivo, puoi fare il login
+    session["email"] = request.form["email"]
     return redirect(url_for('main', email=email))
 
 @app.route("/recover_password")
@@ -87,3 +112,6 @@ def activate_subscriber(email, random_number):
 
     # renderizza login con messaggio utente attivo, puoi fare il login
     return render_template("access.html", message="You are subscribed!")
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

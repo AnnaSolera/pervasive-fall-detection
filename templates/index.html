@@ -26,6 +26,32 @@
           console.log('started')
       }
 
+      function initSensorIPhone() {
+        if (typeof(DeviceMotionEvent) !== 'undefined' && typeof(DeviceMotionEvent.requestPermission) === 'function')
+        {
+            // iOS 13 device (supports the Permissions API)
+            DeviceMotionEvent.requestPermission().then(response => {
+                if (response === 'granted')
+                {
+                    window.addEventListener("deviceorientation", function(event) {
+                        let i = event.beta;
+                        let j = event.gamma;
+                        let k = event.alpha;
+                        $("#output").html(i+"-<br>"+j+"<br>"+k+"<br>")
+                    })
+                }
+                else
+                {
+                    // Permission denied
+                    $("#output").html("permission denied")
+                }
+            }).catch(console.error);
+        } else {
+            $("#output").html("unsupported phone")
+        }
+
+      }
+
       function test() {
         i = j = k = 0;
         $.post("/upload_data",{'i':i,'j':j,'k':k},
@@ -35,11 +61,22 @@
             }
         )
       }
+
+      function logout() {
+        $.post("/logout", {},
+            function(data, status){
+                console.log(data);
+                console.log(status);
+                window.location.href = "/";
+            }
+        )
+      }
     </script>
 
 </head>
 <body>
 <button onclick="initSensor()">Start</button>
+<button onclick="initSensorIPhone()">Start iPhone</button>
 <button onclick="test()">Test senza accelerometro</button>
 <button onclick="logout()">LOGOUT</button>
 <div id="output"></div>

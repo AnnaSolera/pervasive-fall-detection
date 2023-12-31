@@ -1,31 +1,56 @@
 <html>
-    <head><title>Login Page</title></head>
+    <head>
+        <title>Login Page</title>
+        <style>
+            label {
+                display: inline-block;
+                width: 100px;
+            }
+
+            #error {
+                display: block;
+                width: 100%;
+                background-color: #E46A6A;
+                color: #FFFFFF;
+            }
+        </style>
+        
+    </head>
     <body>
 
+        <h1>FALL DETECTION</h1>
+
         {% if message %}
-        <h1>{{ message }}!</h1>
+        <h2 id="error">{{ message }}</h2>
         {% endif %}
 
-        <h1>LOGIN</h1>
+        <h3>LOGIN</h3>
         <form action="/login" method="POST">
-            <input type="text" name="email" />
-            <input type="password" name="password" />
+            <label for="email">e-mail:</label>
+            <input type="text" id="email" name="email" /> <br />
+            <label for="password">password:</label>
+            <input type="password" id="password" name="password" /> <br /><br />
             <button type="submit">LOGIN</button>
         </form>
-        <a href="/recover_password">Recover your password!</a>
+        <!-- <a href="/recover_password">Recover your password!</a>-->
 
-        <h1>SIGN UP</h1>
+        <h3>SIGN UP</h3>
         <form action="/signup" method="POST">
-            <input type="text" name="email" />
-            <input type="password" name="password" />
-            <input type="text" name="passphrase" />
+            <label for="email-signup">e-mail:</label>
+            <input type="text" id="email-signup" name="email" /> <br />
+            <label for="password-signup">password:</label>
+            <input type="password" id="password-signup" name="password" /> <br />
+            <label for="passphrase-signup">passphrase:</label>
+            <input type="text" id ="passphrase-signup" name="passphrase" /> <br /><br />
             <button type="submit">SIGNUP</button>
         </form>
 
-        <h1>SUBSCRIBE TO SOMEONE</h1>
+        <h3>SUBSCRIBE TO SOMEONE</h3>
         <form action="/subscribe" method="POST">
-            <input type="text" name="email" />
-            <input type="text" name="passphrase" />
+            <label for="email-subscribe">e-mail:</label>
+            <input type="text" id="email-subscribe" name="email" /> <br />
+            <label for="passphrase-subscribe">passphrase:</label>
+            <input type="text" id="passphrase-subscribe" name="passphrase" /> <br /><br />
             <button type="submit">SUBSCRIBE</button>
         </form>
 

@@ -34,16 +34,24 @@
                 if (response === 'granted')
                 {
                     window.addEventListener("devicemotion", function(event) {
-                        let i = event.acceleration.x;
-                        let j = event.acceleration.y;
-                        let k = event.acceleration.z;
-                        $("#output").html(i+"-<br>"+j+"<br>"+k+"<br>")
+                        // let i = event.acceleration.x;
+                        // let j = event.acceleration.y;
+                        let z = event.acceleration.z;
+
+                        $("#acceleration").html(z)
+
+                        if (z < "-5") {
+                            $.post("/send_event", {}, function(data, status) {
+                                $("#output").html("FALL DETECTED, email sent to: " + data)
+                            })
+                        }
+                        
                     })
                 }
                 else
                 {
                     // Permission denied
-                    $("#output").html("permission denied")
+                    $("#acceleration").html("permission denied")
                 }
             }).catch(console.error);
         } else {
@@ -52,7 +60,7 @@
                         let i = event.acceleration.x;
                         let j = event.acceleration.y;
                         let k = event.acceleration.z;
-                        $("#output").html(i+"-<br>"+j+"<br>"+k+"<br>")
+                        $("#acceleration").html(i+"-<br>"+j+"<br>"+k+"<br>")
                     })
         }
 
@@ -73,6 +81,10 @@
 <body>
 <button onclick="initSensor()">Start</button>
 <button onclick="logout()">LOGOUT</button>
+<div id="acceleration"></div>
 <div id="output"></div>
+{% if passphrase %}
+<br /><br />Share your passphrase with your close contacts: <b>{{ passphrase }}</b>
+{% endif %}
 </body>
 </html>

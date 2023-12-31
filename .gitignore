@@ -1,4 +1,5 @@
 .venv
 __pycache__
-secret
 .DS_Store
+email.txt
+*.pem

@@ -6,7 +6,7 @@
     <title>Title</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-      function initSensor() {
+      function initSensorOriginal() {
           sensor = new LinearAccelerationSensor({ frequency: 1 });
           sensor.onreading = function() {
             i = sensor.x.toFixed(2)
@@ -26,17 +26,17 @@
           console.log('started')
       }
 
-      function initSensorIPhone() {
+      function initSensor() {
         if (typeof(DeviceMotionEvent) !== 'undefined' && typeof(DeviceMotionEvent.requestPermission) === 'function')
         {
-            // iOS 13 device (supports the Permissions API)
+            // iOS device (supports the Permissions API)
             DeviceMotionEvent.requestPermission().then(response => {
                 if (response === 'granted')
                 {
-                    window.addEventListener("deviceorientation", function(event) {
-                        let i = event.beta;
-                        let j = event.gamma;
-                        let k = event.alpha;
+                    window.addEventListener("devicemotion", function(event) {
+                        let i = event.acceleration.x;
+                        let j = event.acceleration.y;
+                        let k = event.acceleration.z;
                         $("#output").html(i+"-<br>"+j+"<br>"+k+"<br>")
                     })
                 }
@@ -47,19 +47,15 @@
                 }
             }).catch(console.error);
         } else {
-            $("#output").html("unsupported phone")
+            // android
+            window.addEventListener("devicemotion", function(event) {
+                        let i = event.acceleration.x;
+                        let j = event.acceleration.y;
+                        let k = event.acceleration.z;
+                        $("#output").html(i+"-<br>"+j+"<br>"+k+"<br>")
+                    })
         }
 
-      }
-
-      function test() {
-        i = j = k = 0;
-        $.post("/upload_data",{'i':i,'j':j,'k':k},
-            function(data, status){
-                console.log(data)
-                console.log(status)
-            }
-        )
       }
 
       function logout() {
@@ -76,8 +72,6 @@
 </head>
 <body>
 <button onclick="initSensor()">Start</button>
-<button onclick="initSensorIPhone()">Start iPhone</button>
-<button onclick="test()">Test senza accelerometro</button>
 <button onclick="logout()">LOGOUT</button>
 <div id="output"></div>
 </body>

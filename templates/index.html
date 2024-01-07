@@ -26,7 +26,57 @@
           console.log('started')
       }
 
+      function fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms) {
+
+        // STATE 0: detect strong negative acceleration for even just one frame
+        if (current_state == 0 & z < -20) {
+            state_1_for_ms = 0;
+            state_1_no_motion_ms = 0;
+            current_state = 1;
+            state_1_last_timestamp = Date.now();
+
+        // STATE 1: detect no motion for more than 2 sec in the following 3 sec
+        } else if (current_state == 1) {
+            delta_ms = Date.now() - state_1_last_timestamp;
+            state_1_last_timestamp = Date.now();
+
+            state_1_for_ms += delta_ms;
+
+            if (abs(z) < 2) {
+                state_1_no_motion_ms += delta_ms;
+            }
+
+            if (state_1_for_ms > 5000) {
+                if (state_1_no_motion_ms > 3000) {
+                    current_state = 2;
+                } else {
+                    current_state = 0;
+                }
+            }
+
+        // STATE 3: send email if not already sent in the last 10 seconds
+        } else if (current_state == 2) {
+            current_state = 0;
+            if (Date.now() - last_event_recorded > 10000) {
+                last_event_recorded = Date.now();
+
+                $.post("/send_event", {}, function(data, status) {
+                    $("#output").html("FALL DETECTED, email sent to: " + data)
+                })
+            }
+        }
+
+        return [current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms]
+      }
+
       function initSensor() {
+        let last_event_recorded = 0;
+        
+        let current_state = 0;  // 0: excpecting neg acceleration; 1: expecting no motion; 2: send email
+        let state_1_last_timestamp = 0;
+        let state_1_for_ms = 0;
+        let state_1_no_motion_ms = 0;
+
         if (typeof(DeviceMotionEvent) !== 'undefined' && typeof(DeviceMotionEvent.requestPermission) === 'function')
         {
             // iOS device (supports the Permissions API)
@@ -34,18 +84,17 @@
                 if (response === 'granted')
                 {
                     window.addEventListener("devicemotion", function(event) {
-                        // let i = event.acceleration.x;
-                        // let j = event.acceleration.y;
                         let z = event.acceleration.z;
+                        const [current_state_, state_1_last_timestamp_, state_1_for_ms_, state_1_no_motion_ms_] = fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms);
+                        current_state = current_state_;
+                        state_1_last_timestamp = state_1_last_timestamp_;
+                        state_1_for_ms = state_1_for_ms_;
+                        state_1_no_motion_ms = state_1_no_motion_ms_;
 
-                        $("#acceleration").html(z)
+                        $("#acceleration").html(z);
+                        $("#debug").html("CURRENT STATE " + current_state.toString());
+                        $("#debug2").html(state_1_last_timestamp);
 
-                        if (z < "-5") {
-                            $.post("/send_event", {}, function(data, status) {
-                                $("#output").html("FALL DETECTED, email sent to: " + data)
-                            })
-                        }
-                        
                     })
                 }
                 else
@@ -57,11 +106,11 @@
         } else {
             // android
             window.addEventListener("devicemotion", function(event) {
-                        let i = event.acceleration.x;
-                        let j = event.acceleration.y;
-                        let k = event.acceleration.z;
-                        $("#acceleration").html(i+"-<br>"+j+"<br>"+k+"<br>")
-                    })
+                let z = event.acceleration.z;
+                current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms = fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms);
+                $("#acceleration").html(z);
+                $("#debug").html("CURRENT STATE " + current_state.toString());
+            })
         }
 
       }
@@ -83,6 +132,8 @@
 <button onclick="logout()">LOGOUT</button>
 <div id="acceleration"></div>
 <div id="output"></div>
+<div id="debug"></div>
+<div id="debug2"></div>
 {% if passphrase %}
 <br /><br />Share your passphrase with your close contacts: <b>{{ passphrase }}</b>
 {% endif %}

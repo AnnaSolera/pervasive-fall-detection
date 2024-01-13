@@ -67,7 +67,7 @@ if __name__ == "__main__":
     # cursor.execute("insert into users (email, password, passphrase, confirmation_token) VALUES ('anna@gmail.com','anna','qwerty','1111')")
     # cnxn.commit()  # and commit changes
 
-    cursor.execute("select * from subscriptions")
+    cursor.execute("select * from users")
     out = cursor.fetchall()
     print([i[0] for i in cursor.description])
     for row in out:

@@ -164,10 +164,6 @@ def activate_user(email, confirmation_token):
     session["passphrase"] = passphrase
     return redirect(url_for('main', email=email))
 
-@app.route("/recover_password")
-def recover_password():
-    pass
-
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
 

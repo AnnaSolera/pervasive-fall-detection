@@ -42,7 +42,7 @@
 
             state_1_for_ms += delta_ms;
 
-            if (abs(z) < 2) {
+            if (Math.abs(z) < 2) {
                 state_1_no_motion_ms += delta_ms;
             }
 
@@ -54,28 +54,24 @@
                 }
             }
 
-        // STATE 3: send email if not already sent in the last 10 seconds
+        // STATE 2: send email
         } else if (current_state == 2) {
             current_state = 0;
-            if (Date.now() - last_event_recorded > 10000) {
-                last_event_recorded = Date.now();
-
-                $.post("/send_event", {}, function(data, status) {
-                    $("#output").html("FALL DETECTED, email sent to: " + data)
-                })
-            }
+            $.post("/send_event", {}, function(data, status) {
+                $("#output").html("FALL DETECTED, email sent to: " + data)
+            })
         }
 
         return [current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms]
       }
 
-      function initSensor() {
-        let last_event_recorded = 0;
-        
+      function initSensor() {        
         let current_state = 0;  // 0: excpecting neg acceleration; 1: expecting no motion; 2: send email
         let state_1_last_timestamp = 0;
         let state_1_for_ms = 0;
         let state_1_no_motion_ms = 0;
+
+        $("#output").html("");
 
         if (typeof(DeviceMotionEvent) !== 'undefined' && typeof(DeviceMotionEvent.requestPermission) === 'function')
         {
@@ -85,7 +81,7 @@
                 {
                     window.addEventListener("devicemotion", function(event) {
                         let z = event.acceleration.z;
-                        const [current_state_, state_1_last_timestamp_, state_1_for_ms_, state_1_no_motion_ms_] = fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms);
+                        [current_state_, state_1_last_timestamp_, state_1_for_ms_, state_1_no_motion_ms_] = fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms);
                         current_state = current_state_;
                         state_1_last_timestamp = state_1_last_timestamp_;
                         state_1_for_ms = state_1_for_ms_;
@@ -93,8 +89,6 @@
 
                         $("#acceleration").html(z);
                         $("#debug").html("CURRENT STATE " + current_state.toString());
-                        $("#debug2").html(state_1_last_timestamp);
-
                     })
                 }
                 else
@@ -107,7 +101,12 @@
             // android
             window.addEventListener("devicemotion", function(event) {
                 let z = event.acceleration.z;
-                current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms = fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms);
+                [current_state_, state_1_last_timestamp_, state_1_for_ms_, state_1_no_motion_ms_] = fallDetectionLogic(z, current_state, state_1_last_timestamp, state_1_for_ms, state_1_no_motion_ms);
+                current_state = current_state_;
+                state_1_last_timestamp = state_1_last_timestamp_;
+                state_1_for_ms = state_1_for_ms_;
+                state_1_no_motion_ms = state_1_no_motion_ms_;
+
                 $("#acceleration").html(z);
                 $("#debug").html("CURRENT STATE " + current_state.toString());
             })
@@ -127,13 +126,12 @@
     </script>
 
 </head>
-<body>
-<button onclick="initSensor()">Start</button>
+<body onload="initSensor()">
+<button onclick="initSensor()">Reset</button>
 <button onclick="logout()">LOGOUT</button>
 <div id="acceleration"></div>
 <div id="output"></div>
 <div id="debug"></div>
-<div id="debug2"></div>
 {% if passphrase %}
 <br /><br />Share your passphrase with your close contacts: <b>{{ passphrase }}</b>
 {% endif %}

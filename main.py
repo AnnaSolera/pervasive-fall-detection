@@ -133,7 +133,7 @@ def signup():
         return render_template("access.html", message="Could not sign you up: email and passphrase must be unique")
 
     # mando email con link che contiene email e confirmation token
-    confirmation_link = f"{request.base_url}/activate_user/{email}/{confirmation_token}"
+    confirmation_link = f"{request.url_root}/activate_user/{email}/{confirmation_token}"
     message = f"Please click on the following link to activate your account: {confirmation_link}"
     send_email(email=email, subject="FALL DETECTION: confirm your account", message=message)
 
